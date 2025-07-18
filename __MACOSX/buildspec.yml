@@ -1,18 +1,14 @@
 version: 0.2
 
 phases:
-  install:
-    runtime-versions:
-      python: 3.11
-    commands:
-      - pip install aws-sam-cli
   build:
     commands:
-      - echo "Building and packaging Lambda function..."
-      - sam build
-      - sam package \
-          --s3-bucket springimagesmohan \
-          --output-template-file packaged.yaml
-artifacts:
-  files:
-    - packaged.yaml
+      - echo "Building the Docker image..."
+      - docker build -t $ImageName .
+
+  post_build:
+    commands:
+      - echo "Tagging image..."
+      - docker tag $ImageName:latest <your-ecr-uri>/$ImageName:latest
+      - echo "Pushing image to ECR..."
+      - docker push <your-ecr-uri>/$ImageName:latest
