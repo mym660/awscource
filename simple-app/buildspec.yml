@@ -4,11 +4,11 @@ phases:
   build:
     commands:
       - echo "Building the Docker image..."
-      - docker build -t $ImageName .
+      - docker build -t $ImageName -f simple-app/Dockerfile simple-app
 
   post_build:
     commands:
       - echo "Tagging image..."
-      - docker tag $ImageName:latest <your-ecr-uri>/$ImageName:latest
+      - docker tag $ImageName:latest $ECR_URI/$ImageName:latest
       - echo "Pushing image to ECR..."
-      - docker push <your-ecr-uri>/$ImageName:latest
+      - docker push $ECR_URI/$ImageName:latest
