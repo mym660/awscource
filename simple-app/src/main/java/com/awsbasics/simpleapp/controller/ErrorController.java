@@ -29,6 +29,10 @@ public class ErrorController {
                 .body(buildErrorDto(request));
     }
 
+
+
+
+    
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorDto> handleNotFoundException(HttpServletRequest request) {
         return ResponseEntity.status(NOT_FOUND)
