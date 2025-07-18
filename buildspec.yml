@@ -11,4 +11,4 @@ phases:
       - echo "Tagging image..."
       - docker tag $ImageName:latest $ECR_URI/$ImageName:latest
       - echo "Pushing image to ECR..."
-      - docker push $ECR_URI/$ImageName:latest
+      - docker push $ECR_URI/$ImageName:latest 
