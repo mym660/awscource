@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM Template for demo-UploadsNotificationFunction
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: python3.13
+    MemorySize: 128
+    Tracing: Active
+    Environment:
+      Variables:
+        SNS_TOPIC_ARN: !Ref UploadsSNSTopic
+        SQS_QUEUE_URL: !Ref UploadsQueue
+
+Resources:
+
+  UploadsNotificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: demo-UploadsNotificationFunction
+      Handler: lambda_function.lambda_handler
+      CodeUri: ./uploads-notification/
+      Role: !GetAtt LambdaExecutionRole.Arn
+      AutoPublishAlias: live
+      Events:
+        ImageUploadSQS:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt UploadsQueue.Arn
+      DeploymentPreference:
+        Type: AllAtOnce
+
+  UploadsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: demo-UploadsQueue
+
+  UploadsSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: demo-UploadsSNSTopic
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: demo-UploadsNotificationRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AllowSQSAndSNSAndLogs
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                  - sns:Publish
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
