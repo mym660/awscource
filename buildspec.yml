@@ -1,14 +1,27 @@
 version: 0.2
 
+env:
+  variables:
+    S3_BUCKET: springimagesmohan
+
 phases:
+  install:
+    runtime-versions:
+      java: corretto17
+      python: 3.13
+    commands:
+      - pip install aws-sam-cli
+  pre_build:
+    commands:
+      - echo "Running tests..."
+      - ./simple-app/gradlew -p simple-app test
   build:
     commands:
-      - echo "Building the Docker image..."
-      - docker build -t $ImageName -f simple-app/Dockerfile simple-app
-
-  post_build:
-    commands:
-      - echo "Tagging image..."
-      - docker tag $ImageName:latest $ECR_URI/$ImageName:latest
-      - echo "Pushing image to ECR..."
-      - docker push $ECR_URI/$ImageName:latest 
+      - echo "Building JAR..."
+      - ./simple-app/gradlew -p simple-app build
+      - echo "Packaging Lambda with SAM..."
+      - sam package --template-file simple-app/template.yaml --s3-bucket $S3_BUCKET --output-template-file packaged-template.yaml
+artifacts:
+  files:
+    - packaged-template.yaml
+    - simple-app/build/libs/*.jar
