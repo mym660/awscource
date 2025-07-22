@@ -62,11 +62,19 @@ Resources:
                   - sqs:ReceiveMessage
                   - sqs:DeleteMessage
                   - sqs:GetQueueAttributes
+                Resource: !GetAtt UploadsQueue.Arn
+              - Effect: Allow
+                Action:
                   - sns:Publish
-                Resource: "*"
+                Resource: !Ref UploadsSNSTopic
               - Effect: Allow
                 Action:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: "*"
+
+Outputs:
+  UploadsFunction:
+    Description: "ARN of the Lambda function"
+    Value: !GetAtt UploadsNotificationFunction.Arn

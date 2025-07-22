@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    S3_BUCKET: springimagesmohan
+    S3_BUCKET: demo-springimagesmohan
 
 phases:
   install:
@@ -10,7 +10,8 @@ phases:
       java: corretto17
       python: 3.13
     commands:
-      - pip install aws-sam-cli
+      - echo "Installing dependencies..."
+      - chmod +x ./simple-app/gradlew
   pre_build:
     commands:
       - echo "Running tests..."
@@ -19,8 +20,10 @@ phases:
     commands:
       - echo "Building JAR..."
       - ./simple-app/gradlew -p simple-app build
-      - echo "Packaging Lambda with SAM..."
+      - echo "Building and packaging SAM template..."
+      - sam build --template-file simple-app/template.yaml
       - sam package --template-file simple-app/template.yaml --s3-bucket $S3_BUCKET --output-template-file packaged-template.yaml
+
 artifacts:
   files:
     - packaged-template.yaml
